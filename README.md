@@ -163,11 +163,11 @@ compose.yml              Optional Docker Compose setup for PostgreSQL and the AP
 
 ## 6. Screenshots
 
-Add a screenshot of the running dashboard at `docs/assets/tradejournal-dashboard.png`, then replace the line below with the image.
+assets/demoo_desktop.png
+<img width="1244" height="726" alt="jourrnal" src="https://github.com/user-attachments/assets/6db07b18-bf85-4dda-a95b-af4bf00cef1b" />
+<img width="1358" height="890" alt="demoo_desktop" src="https://github.com/user-attachments/assets/7c6c8635-9c20-4cc9-833b-40f1667e9f52" />
+<img width="322" height="710" alt="demo_phone" src="https://github.com/user-attachments/assets/ee1b3dc4-9cdd-4e65-928f-0247c5394b90" />
 
-```md
-![TradeJournal dashboard](docs/assets/tradejournal-dashboard.png)
-```
 
 ## 7. Known issues and next steps
 
