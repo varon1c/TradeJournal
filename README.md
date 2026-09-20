@@ -1,5 +1,7 @@
 # TradeJournal
 
+A fast, responsive web application for logging daily trades, tracking performance metrics, and reviewing risk management.
+
 ## 1. Overview
 
 TradeJournal is a personal web application for recording completed trades and reviewing trading performance over time. It is designed for a student learning trading who needs one organized place to review trade setups, wins, losses, and mistakes instead of relying on memory or scattered notes.
@@ -18,8 +20,8 @@ The app stores trade records with PostgreSQL, serves them through an Express API
 ### Get the code
 
 ```powershell
-git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-cd YOUR-REPOSITORY
+git clone https://github.com/varon1c/TradeJournal.git
+cd TradeJournal
 ```
 
 ### Install dependencies
@@ -163,13 +165,14 @@ compose.yml              Optional Docker Compose setup for PostgreSQL and the AP
 
 ## 6. Screenshots
 
-assets/demoo_desktop.png
-<img width="1244" height="726" alt="jourrnal" src="https://github.com/user-attachments/assets/6db07b18-bf85-4dda-a95b-af4bf00cef1b" />
-<img width="1358" height="890" alt="demoo_desktop" src="https://github.com/user-attachments/assets/7c6c8635-9c20-4cc9-833b-40f1667e9f52" />
-<img width="322" height="710" alt="demo_phone" src="https://github.com/user-attachments/assets/ee1b3dc4-9cdd-4e65-928f-0247c5394b90" />
+<img width="1358" height="890" alt="demoo_desktop" src="https://github.com/user-attachments/assets/494c111f-ab57-4e21-8eb5-5bf414365f38" />
+<img width="322" height="710" alt="demo_phone" src="https://github.com/user-attachments/assets/b25d4642-d7f8-49d3-97c5-cbc33c9b4299" />
+<img width="1244" height="726" alt="jourrnal" src="https://github.com/user-attachments/assets/90774672-e207-43c7-bbda-cf82b567f650" />
 
+## 7. Architecture
+TradeJournal follows a three-tier client-server architecture. The React and Vite frontend provides the dashboard, journal form, charts, and trade history interface. It communicates with the Node.js and Express backend through REST API requests to create, view, update, and delete trade records. The Express server validates requests and passes data operations to a separate repository layer, which uses parameterized SQL queries to securely read and write trade data in PostgreSQL. For demonstration without a database, the frontend can switch to a mock API that stores entries in the browser’s local storage.
 
-## 7. Known issues and next steps
+## 8. Known issues and next steps
 
 - The PostgreSQL schema and API are complete, but the database still needs to be installed, configured, and tested locally on the development computer.
 - Demo mode uses local storage only; it is not shared between browsers or users.
@@ -184,6 +187,8 @@ assets/demoo_desktop.png
 - Slides: Pending
 - Square image: Pending
 
-## Project documents
+Author & Licence
+Built by Charles Jansen V. Manusig (@varon1c) — HAU · 6APSI Final Project. MIT License.
 
-Additional coursework documents are in [docs/](docs/README.md).
+
+
