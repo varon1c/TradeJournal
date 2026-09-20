@@ -1,27 +1,10 @@
--- Sample data for development.
---
--- This starts with TRUNCATE. That is correct on your laptop and catastrophic
--- against the database your live demo depends on. Check which DATABASE_URL is
--- loaded before you run it.
+-- Sample trades for local development only. This clears the local table.
+TRUNCATE TABLE trades RESTART IDENTITY;
 
-TRUNCATE TABLE sightings RESTART IDENTITY CASCADE;
-
-INSERT INTO sightings (place, description, spookiness, reported_at) VALUES
-  ('Library, third floor',
-   'Chairs rearranged overnight, every time. The night guard says he locks the room himself.',
-   3, now() - interval '12 days'),
-  ('Old gym',
-   'Lights flicker in a fixed pattern after 9pm, always three short and one long.',
-   4, now() - interval '10 days'),
-  ('Parking basement',
-   'Footsteps with no one there. Reported separately by three different people in one week, which is what makes this one hard to dismiss. Two of them were alone at the time and did not know about the others. This row is deliberately long, because a seed of four words hides every text-wrapping bug you have.',
-   5, now() - interval '8 days'),
-  ('Canteen',
-   'A cold spot near the back door, every morning before seven.',
-   1, now() - interval '7 days'),
-  ('AB Building stairwell',
-   '',
-   2, now() - interval '5 days'),
-  ('Chapel garden',
-   'Someone humming. Stops the moment you turn around.',
-   3, now() - interval '2 days');
+INSERT INTO trades (ticker, entry_price, exit_price, position_size, trade_date, outcome, notes) VALUES
+  ('AAPL', 210.15, 214.80, 10, '2026-08-28', 'win', 'Breakout above pre-market resistance. Took profit near the next resistance level.'),
+  ('BTCUSD', 114200.00, 112950.00, 0.02, '2026-08-30', 'loss', 'Entered too early before confirmation. Wait for the candle close next time.'),
+  ('TSLA', 335.40, 342.10, 5, '2026-09-03', 'win', 'Followed the trend after a pullback to support.'),
+  ('NVDA', 178.90, 176.20, 8, '2026-09-06', 'loss', 'Stopped out. Risk was managed, but the setup was not strong enough.'),
+  ('ETHUSD', 4300.00, 4385.00, 0.15, '2026-09-10', 'win', 'Clean bounce from a key support zone.'),
+  ('MSFT', 502.30, 499.60, 6, '2026-09-13', 'loss', 'Chased the move after the entry signal had already passed.');

@@ -1,33 +1,48 @@
-# Design system
+# TradeJournal Design System
 
-The rules your interface follows, written down, so that screen four looks like
-screen one.
+TradeJournal uses a dark trading-terminal style with blue analytical highlights and red loss states. Panels stay calm and dense so live trade data remains the focus.
 
-**Part of this is a visual document**, submitted as a PDF or images. Swatches,
-type samples and component states, not paragraphs describing them.
+## Colour
 
-## What to record
+| Name | Hex value | Used for |
+| --- | --- | --- |
+| Night | `#070A1B` | Page background |
+| Panel | `#141827` | Cards and surfaces |
+| Panel dark | `#101423` | Inputs and secondary panels |
+| Line | `#252C42` | Borders and chart baselines |
+| Ink | `#EDF0FF` | Main text |
+| Muted | `#99A3C1` | Labels and supporting text |
+| Signal blue | `#2097F6` | Primary actions, wins, charts, and focus |
+| Signal red | `#FA4E59` | Losses, delete actions, and the ratio bar |
+| Green | `#32C993` | Winning calendar marks |
+| Gold | `#F6B44C` | Demo notice |
 
-**Colour.** Every colour, with its hex value and the name you use for it in code.
-Check text against its background for contrast; the WCAG minimum is 4.5 to 1 for
-normal text, and it is checked.
+## Typography
 
-**Type.** The family, and the sizes you actually use, each with a name. Three or
-four sizes is plenty.
+| Style | Font | Use |
+| --- | --- | --- |
+| Display | Manrope, 800 | Dashboard heading and key values |
+| Heading | Manrope, 700–800 | Panel, form, and journal headings |
+| Body | Manrope | Descriptions and controls |
+| Data label | DM Mono | Dates, labels, badges, and chart metadata |
 
-**Spacing.** One scale, and stick to it. Numbers chosen at random per component
-is the single most common reason a student project looks unfinished.
+## Layout
 
-**Components.** For each reusable piece: what it looks like normally, on hover,
-focused, disabled, and while loading. **Focus states are not optional**: removing
-an outline without replacing it makes your app unusable with a keyboard.
+The desktop dashboard starts with three metric cards. The analysis area then uses a two-column layout: the calendar and performance summary sit on the left; radar, trade-count, and balance panels sit on the right. The entry form and history list form a separate two-column workspace below.
 
-**States.** Loading, empty, error and data are four different screens. Decide what
-each looks like once, here, rather than improvising per page.
+At 820px, the page becomes a single analysis column. At 540px, all cards, form fields, and trade values stack without horizontal scrolling.
+
+## Components
+
+| Component | Purpose |
+| --- | --- |
+| Metric cards | Winstreak, win rate gauge, and average win/loss ratio |
+| Calendar | Monthly visual index of wins, losses, mixed days, and trade count |
+| Radar | Data-derived summary score for trade behaviour |
+| Trend panels | Cumulative monthly P/L and monthly trade activity lines |
+| Trade form | Existing create/edit trade workflow in the dark visual language |
+| Trade card | Trade details, outcome badge, P/L, notes, edit, and delete actions |
 
 ## In code
 
-Say where these live: CSS custom properties, a Tailwind config, a theme object, a
-component library you configured. The template starts with custom properties in
-`client/src/styles.css`. Module 3 covered the alternatives; use the one you can
-defend.
+The dashboard structure and derived metrics are in [App.jsx](../src/App.jsx). The responsive dark interface rules are in [styles.css](../src/styles.css).

@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { pool } from './db/pool.js'
-import * as sightings from './sightingsRepo.js'
+import * as trades from './sightingsRepo.js'
 
 const app = express()
 
@@ -40,32 +40,40 @@ app.get('/readyz', async (request, response) => {
 // browser form is for a fast, friendly message; this is for correctness.
 function validate(body) {
   const errors = []
-  const place = typeof body.place === 'string' ? body.place.trim() : ''
-  const description =
-    typeof body.description === 'string' ? body.description.trim() : ''
-  const spookiness = Number(body.spookiness)
+  const ticker = typeof body.ticker === 'string' ? body.ticker.trim().toUpperCase() : ''
+  const notes = typeof body.notes === 'string' ? body.notes.trim() : ''
+  const entryPrice = Number(body.entryPrice)
+  const exitPrice = Number(body.exitPrice)
+  const positionSize = Number(body.positionSize)
+  const tradeDate = typeof body.tradeDate === 'string' ? body.tradeDate : ''
+  const outcome = typeof body.outcome === 'string' ? body.outcome : ''
 
-  if (!place) errors.push('place is required')
-  if (place.length > 120) errors.push('place must be 120 characters or fewer')
-  if (description.length > 2000) errors.push('description must be 2000 characters or fewer')
-  if (!Number.isInteger(spookiness) || spookiness < 1 || spookiness > 5) {
-    errors.push('spookiness must be a whole number from 1 to 5')
+  if (!ticker) errors.push('ticker is required')
+  if (ticker.length > 20) errors.push('ticker must be 20 characters or fewer')
+  if (!Number.isFinite(entryPrice) || entryPrice < 0) errors.push('entry price must be zero or more')
+  if (!Number.isFinite(exitPrice) || exitPrice < 0) errors.push('exit price must be zero or more')
+  if (!Number.isFinite(positionSize) || positionSize <= 0) errors.push('position size must be greater than zero')
+  const parsedDate = new Date(`${tradeDate}T00:00:00Z`)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(tradeDate) || Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== tradeDate) {
+    errors.push('a valid trade date is required')
   }
+  if (!['win', 'loss'].includes(outcome)) errors.push('outcome must be win or loss')
+  if (notes.length > 2000) errors.push('notes must be 2,000 characters or fewer')
 
-  return { errors, value: { place, description, spookiness } }
+  return { errors, value: { ticker, entryPrice, exitPrice, positionSize, tradeDate, outcome, notes } }
 }
 
-app.get('/api/sightings', async (request, response, next) => {
+app.get('/api/trades', async (request, response, next) => {
   try {
-    response.json(await sightings.getAll(pool))
+    response.json(await trades.getAll(pool))
   } catch (error) {
     next(error)
   }
 })
 
-app.get('/api/sightings/:id', async (request, response, next) => {
+app.get('/api/trades/:id', async (request, response, next) => {
   try {
-    const row = await sightings.getById(pool, request.params.id)
+    const row = await trades.getById(pool, request.params.id)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
@@ -73,23 +81,23 @@ app.get('/api/sightings/:id', async (request, response, next) => {
   }
 })
 
-app.post('/api/sightings', async (request, response, next) => {
+app.post('/api/trades', async (request, response, next) => {
   const { errors, value } = validate(request.body ?? {})
   if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
 
   try {
-    response.status(201).json(await sightings.create(pool, value))
+    response.status(201).json(await trades.create(pool, value))
   } catch (error) {
     next(error)
   }
 })
 
-app.put('/api/sightings/:id', async (request, response, next) => {
+app.put('/api/trades/:id', async (request, response, next) => {
   const { errors, value } = validate(request.body ?? {})
   if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
 
   try {
-    const row = await sightings.update(pool, request.params.id, value)
+    const row = await trades.update(pool, request.params.id, value)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
@@ -97,9 +105,9 @@ app.put('/api/sightings/:id', async (request, response, next) => {
   }
 })
 
-app.delete('/api/sightings/:id', async (request, response, next) => {
+app.delete('/api/trades/:id', async (request, response, next) => {
   try {
-    const removed = await sightings.remove(pool, request.params.id)
+    const removed = await trades.remove(pool, request.params.id)
     if (!removed) return response.status(404).json({ error: 'Not found' })
     response.status(204).end()
   } catch (error) {

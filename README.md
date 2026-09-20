@@ -1,156 +1,189 @@
-# Your Project Name
+# TradeJournal
 
-> **Replace this whole file.** It is a worked example of the README your project
-> will be graded from, not a file to leave as it is. Start with
-> [START-HERE.md](START-HERE.md).
+## 1. Overview
 
-One sentence saying what this does and who it is for.
+TradeJournal is a personal web application for recording completed trades and reviewing trading performance over time. It is designed for a student learning trading who needs one organized place to review trade setups, wins, losses, and mistakes instead of relying on memory or scattered notes.
 
-**Live site:** https://yourusername.github.io/your-repo-name/
-**API:** https://your-api.onrender.com/healthz
-**Demo video:** (link)
+The app stores trade records with PostgreSQL, serves them through an Express API, and displays them in a React dashboard. It can also run in browser-only demo mode while a real database is being set up.
 
-> **This deployment is running in demo mode.** The interface is real; the backend
-> is simulated in your browser so the site works without a server. See
-> [Demo mode](#demo-mode) below. Delete this quote once your API is live.
+## 2. Setup and installation
 
-![A screenshot of the main screen](docs/assets/screenshot.png)
+### Requirements
 
-## What it does
+- [Node.js](https://nodejs.org/) 20 or newer
+- PostgreSQL 17 or newer for the full database version
+- Git
+- A terminal such as PowerShell or the VS Code integrated terminal
 
-- Report a sighting with a place, a description and a spookiness rating
-- Browse everything reported, newest first
-- Delete a report
+### Get the code
 
-## Built with
+```powershell
+git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
+cd YOUR-REPOSITORY
+```
 
-React and Vite on the front end, Express and PostgreSQL on the back end. The
-client is on GitHub Pages, the API on (host), the database on (host).
+### Install dependencies
 
-## Demo mode
+Install the server and client dependencies separately:
 
-This repository can run two ways, chosen by one environment variable at **build**
-time.
+```powershell
+cd server
+npm install
+cd ../client
+npm install
+cd ..
+```
 
-**Demo mode is the default.** Only the exact string `false` turns it off, so a
-forgotten or mistyped variable leaves you on the simulated backend with a visible
-notice rather than on a silently broken build.
+### Environment and configuration
 
-| `VITE_USE_MOCK_API` | What happens |
-| --- | --- |
-| unset, or `true` | The client answers its own requests from `localStorage`. No server, no database, nothing shared between visitors. This is what the template ships with, so the GitHub Pages link works on day one. |
-| `false` | The client calls the Express API at `VITE_API_BASE_URL`, which reads and writes real PostgreSQL. |
+Never commit real passwords or connection strings. Create the local `.env` files from the supplied examples.
 
-**Demo mode is a starting point and a fallback, not a finished project.** Your
-finals submission is all three pieces deployed and talking to each other. Demo
-mode is there so you can build the interface in week one before the API exists,
-and so you have something to show if a free tier is asleep during your demo.
+**Server:** copy `server/.env.example` to `server/.env`.
 
-GitHub Pages serves files and cannot run Node, so the API and the database can
-never live there. They go somewhere else:
-
-| Piece | Options |
-| --- | --- |
-| **API** | Render, Railway, Fly.io, Koyeb, a VPS, or [self-hosted behind a tunnel](../content/extending-your-app/11-self-hosting.md) |
-| **Database** | Neon, Supabase, Railway, Aiven, or your own PostgreSQL |
-
-`content/extending-your-app/` in your course workspace walks through all of it.
-Page 10 is the decision page if you do not know which to pick.
-
-## Running it yourself
-
-**The client only, in demo mode.** No database needed.
-
-    cd client
-    npm install
-    cp .env.example .env        # VITE_USE_MOCK_API stays true
-    npm run dev                 # http://localhost:5173
-
-**The whole stack.** Needs a PostgreSQL, either local or hosted.
-
-    # 1. the database
-    docker run --name my-pg -e POSTGRES_PASSWORD=devpassword \
-      -e POSTGRES_DB=haunted -p 5432:5432 -d postgres:17
-
-    # 2. the API
-    cd server
-    npm install
-    cp .env.example .env        # check DATABASE_URL
-    npm run db:reset            # creates the tables and adds sample rows
-    npm run dev                 # http://localhost:3000
-
-    # 3. the client, in another terminal
-    cd client
-    npm install
-    cp .env.example .env
-    # set VITE_USE_MOCK_API=false
-    npm run dev
-
-Check the API on its own before you blame the client:
-
-    curl http://localhost:3000/healthz     # is the process alive
-    curl http://localhost:3000/readyz      # is the database reachable
-    curl http://localhost:3000/api/sightings
-
-## Environment variables
-
-None of these are committed. `.env.example` in each folder lists them with
-placeholder values.
-
-| Name | Where | What it is |
+| Variable | Example value | Purpose |
 | --- | --- | --- |
-| `DATABASE_URL` | server | PostgreSQL connection string. Contains a password |
-| `CORS_ORIGINS` | server | comma-separated origins allowed to call the API |
-| `NODE_ENV` | server | `production` on your host |
-| `PORT` | server | **set by the host**, do not set it yourself |
-| `VITE_USE_MOCK_API` | client, at build time | only `false` turns demo mode off; unset means on |
-| `VITE_API_BASE_URL` | client, at build time | your API's public URL, no trailing slash |
+| `DATABASE_URL` | `postgres://postgres:your_password@localhost:5432/tradejournal` | PostgreSQL connection string. |
+| `CORS_ORIGINS` | `http://localhost:5173` | Frontend origin allowed to call the API. |
+| `NODE_ENV` | `development` | Server environment. |
+| `PORT` | `3000` | Optional local API port; deployment hosts normally provide this automatically. |
 
-Every `VITE_` value is compiled into the built JavaScript and is **public**.
-Never put a key, a password or a connection string in one.
+**Client:** copy `client/.env.example` to `client/.env`.
 
-## Deploying
+| Variable | Example value | Purpose |
+| --- | --- | --- |
+| `VITE_USE_MOCK_API` | `false` | Set to `false` for PostgreSQL/API mode; set to `true` for browser-only demo mode. |
+| `VITE_API_BASE_URL` | `http://localhost:3000` | Public base URL for the Express API. |
 
-**Client, to GitHub Pages.** Already wired up in
-`.github/workflows/deploy-pages.yml`. Two one-time steps:
+On Windows PowerShell, create the files with:
 
-1. **Settings > Pages > Build and deployment > Source: GitHub Actions.** Without
-   this the workflow goes green and publishes nothing.
-2. Nothing else, until your API is live. Demo mode is the default, so the first
-   deploy works on its own. When the API is up, add `VITE_USE_MOCK_API` = `false`
-   and `VITE_API_BASE_URL` under **Settings > Secrets and variables > Actions >
-   Variables**, then re-run the workflow.
+```powershell
+Copy-Item server/.env.example server/.env
+Copy-Item client/.env.example client/.env
+```
 
-The repository must be **public** for Pages to serve it on a free account.
+### Set up and seed the database
 
-**API and database.** Not automated here, because most hosts deploy straight from
-your repository with no workflow at all. Point your host at the `server/` folder,
-set the environment variables in its dashboard, and run `server/db/schema.sql`
-once against the hosted database.
+1. Create a PostgreSQL database named `tradejournal`:
 
-## Project structure
+   ```powershell
+   createdb tradejournal
+   ```
 
-    client/          React front end, built by Vite
-      src/api/       ONE interface, two implementations, chosen by a variable
-      src/components/
-    server/          Express API
-      db/            pool, schema.sql, seed.sql, and a runner for them
-    compose.yml      only if you self-host
-    docs/            your planning documents and weekly reports
+2. Add the database connection string to `server/.env`.
 
-## Architecture
+3. Create the `trades` table and load the sample entries:
 
-Three or four sentences, or a small diagram. Which piece talks to which, and
-where each one is hosted.
+   ```powershell
+   cd server
+   npm run db:reset
+   ```
 
-## What I would do next
+`db:reset` runs [server/db/schema.sql](server/db/schema.sql) and [server/db/seed.sql](server/db/seed.sql). The seed script clears existing local trade records, so only use it for development data.
 
-Three honest bullets. This paragraph is worth more than it looks.
+## 3. How to run it
 
-## Author
+### Full version: React, Express, and PostgreSQL
 
-Your name, and a link. Course and section.
+With PostgreSQL running and the setup above completed, open two terminals.
 
-## Licence
+**Terminal 1 — API**
 
-MIT, see [LICENSE](LICENSE). Put your own name in it.
+```powershell
+cd server
+npm run dev
+```
+
+The API should start at `http://localhost:3000`. Visiting `http://localhost:3000/healthz` should return `{"ok":true}`.
+
+**Terminal 2 — client**
+
+Make sure `client/.env` includes:
+
+```env
+VITE_USE_MOCK_API=false
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+Then run:
+
+```powershell
+cd client
+npm run dev
+```
+
+Open `http://localhost:5173`. You should see the TradeJournal dashboard with trade statistics, a **Log a trade** form, and the trade journal list.
+
+### Demo mode: no PostgreSQL required
+
+To run only the interface, set this in `client/.env`:
+
+```env
+VITE_USE_MOCK_API=true
+```
+
+Then run `npm run dev` in `client`. This mode saves trades in that browser's local storage; data is not shared and is deleted if browser storage is cleared.
+
+## 4. Features and usage
+
+1. Open the dashboard at `http://localhost:5173`.
+2. In **Log a trade**, enter a ticker or asset, entry price, exit price, position size, date, outcome, and optional setup notes.
+3. Select **Add to journal**. The new entry appears in the journal and the statistics update.
+4. Use the journal filter to show all trades, wins, or losses.
+5. Select **Edit** to correct a trade, or **Delete** to remove an entry.
+
+The dashboard opens with an analytics view: a winstreak card, win-rate gauge, average win/loss ratio, monthly calendar, WaveScore radar, trade-count trend, and balance trend. These values are calculated from saved trades. Estimated profit/loss is calculated as `(exit price − entry price) × position size`.
+
+### API endpoints
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/healthz` | Confirms the Express process is running. |
+| `GET` | `/readyz` | Confirms PostgreSQL is reachable. |
+| `GET` | `/api/trades` | Returns all trades, newest first. |
+| `GET` | `/api/trades/:id` | Returns one trade. |
+| `POST` | `/api/trades` | Creates a trade. |
+| `PUT` | `/api/trades/:id` | Updates a trade. |
+| `DELETE` | `/api/trades/:id` | Deletes a trade. |
+
+## 5. Project structure
+
+```text
+client/                  React and Vite frontend
+  src/App.jsx            Dashboard, trade form, statistics, and journal UI
+  src/api/               API clients for demo mode and the Express API
+  src/styles.css         Responsive styles
+server/                  Express API
+  server.js              Routes, validation, CORS, and server startup
+  sightingsRepo.js       Parameterized PostgreSQL queries for trades
+  db/schema.sql          PostgreSQL trades table and index
+  db/seed.sql            Sample development trades
+docs/                    Proposal, design, weekly reports, and other coursework docs
+compose.yml              Optional Docker Compose setup for PostgreSQL and the API
+```
+
+## 6. Screenshots
+
+Add a screenshot of the running dashboard at `docs/assets/tradejournal-dashboard.png`, then replace the line below with the image.
+
+```md
+![TradeJournal dashboard](docs/assets/tradejournal-dashboard.png)
+```
+
+## 7. Known issues and next steps
+
+- The PostgreSQL schema and API are complete, but the database still needs to be installed, configured, and tested locally on the development computer.
+- Demo mode uses local storage only; it is not shared between browsers or users.
+- The estimated profit/loss calculation assumes a long position. A future version should support long/short trade direction and fees.
+- Add search or filtering by ticker and date.
+- Add charts to show performance and win rate over time.
+- Capture and add a real screenshot after running the app.
+
+## Presentation
+
+- Video: Pending
+- Slides: Pending
+- Square image: Pending
+
+## Project documents
+
+Additional coursework documents are in [docs/](docs/README.md).
