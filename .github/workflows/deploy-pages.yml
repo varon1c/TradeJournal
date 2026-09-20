@@ -24,7 +24,12 @@ on:
   push:
     branches: [main]
     paths:
-      - 'client/**'
+      - 'src/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.js'
+      - 'index.html'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -46,18 +51,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # A fresh copy of the template already has a client, but you may well
-      # restructure. Skip quietly rather than failing, so your repository is not
-      # red before you have written anything.
+      # The Vite client lives at the repository root.
       - id: check
         env:
           IS_PRIVATE: ${{ github.event.repository.private }}
         run: |
-          if [ -f client/package.json ]; then
+          if [ -f package.json ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No client/package.json, so there is nothing to build yet."
+            echo "::notice::No package.json, so there is nothing to build yet."
           fi
           # GitHub Pages only publishes PUBLIC repositories on a free account.
           # Say so loudly rather than failing later with a confusing 404.
@@ -70,15 +73,13 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: client/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - if: steps.check.outputs.ready == 'true'
-        working-directory: client
         run: npm ci
 
       - name: Build
         if: steps.check.outputs.ready == 'true'
-        working-directory: client
         env:
           # On a project page the site is served from username.github.io/<repo>/,
           # so assets need that prefix or every one of them 404s and you get a
@@ -95,7 +96,7 @@ jobs:
       - if: steps.check.outputs.ready == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: client/dist
+          path: dist
 
   deploy:
     needs: build
