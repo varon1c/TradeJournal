@@ -4,22 +4,10 @@
 
 TradeJournal now uses a dark, data-first dashboard. It takes the structure of the supplied reference: a compact metric row, a calendar-led analytics area, a radar summary, and small line charts. The working trade-entry form and trade history remain below the analytics area.
 
-```text
-┌───────────────────────────────────────────────────────────────────┐
-│ TradeJournal                         Performance  Journal  + Trade │
-├───────────────────────┬──────────────────┬────────────────────────┤
-│ Winstreak             │ Winrate          │ Avg win / avg loss     │
-│ Current run, wins/loss│ Donut gauge      │ Blue/red ratio bar     │
-├───────────────────────┴──────────────────┼────────────────────────┤
-│ Month calendar                            │ WaveScore Radar        │
-│ Day colour: win, loss, or mixed           │ Trade Count line       │
-│ Monthly trade, win, and P/L totals        │ Balance line            │
-├───────────────────────────────────────────┴────────────────────────┤
-│ Performance summary                                                │
-├──────────────────────────────┬─────────────────────────────────────┤
-│ Trade entry form             │ Trade journal and outcome filter    │
-└──────────────────────────────┴─────────────────────────────────────┘
-```
+<img width="1358" height="890" alt="demoo_desktop" src="https://github.com/user-attachments/assets/1396129d-fc5d-4334-be05-838c8e4422b3" />
+<img width="322" height="710" alt="demo_phone" src="https://github.com/user-attachments/assets/a48da246-a2cf-4aae-95d2-84f4a41fdacf" />
+<img width="1244" height="726" alt="jourrnal" src="https://github.com/user-attachments/assets/92a6abd6-f43b-4814-8f0d-215d5ab726b6" />
+
 
 ## Important screen states
 
