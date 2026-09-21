@@ -1,6 +1,7 @@
 # TradeJournal
 
 A fast, responsive web application for logging daily trades, tracking performance metrics, and reviewing risk management.
+
 Live site: https://varon1c.github.io/TradeJournal/ Live API (temporary): - Demo video: (link — to be added before finals)
 ## 1. Overview
 
