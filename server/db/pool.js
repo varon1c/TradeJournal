@@ -1,5 +1,10 @@
 import pg from 'pg'
 
+// PostgreSQL DATE has no time or timezone. Returning it as a JavaScript Date
+// shifts some calendar days when JSON serializes it in a non-UTC timezone.
+// Keep it as the ISO date string the browser's date inputs and calendar use.
+pg.types.setTypeParser(1082, (value) => value)
+
 // Fail at boot with one clear line, rather than with a mystery 500 an hour
 // later. The commonest deployment mistake is setting a variable in .env on your
 // laptop and never setting it in the host's dashboard.

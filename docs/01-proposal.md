@@ -1,61 +1,60 @@
-# TradeJournal Proposal
+# App Proposal: TradeJournal
 
-## Overview
+## App name
 
-TradeJournal is a personal website for logging completed trades and reviewing performance over time. It is for me as a student learning trading, so I can record both wins and losses, review my setup notes, and identify repeated mistakes instead of relying on memory.
+TradeJournal
 
-## Problem it solves
+## What the app is for, in one sentence
 
-Trading notes can easily become scattered across paper, phone notes, or memory. This makes it difficult to review why a trade was taken or learn from a loss. TradeJournal keeps each trade in one place and turns the history into useful statistics, including total trades, wins, losses, win rate, and estimated profit/loss.
+TradeJournal helps a student trader record completed trades, review the reasons behind their wins and losses, and use performance data to improve future trading decisions.
 
-## Main user flow
+## Who is it for
 
-1. Open the TradeJournal dashboard.
-2. Enter the ticker or asset, entry price, exit price, position size, trade date, outcome, and setup notes.
-3. Select **Add to journal** to save the trade.
-4. Review the trade list and use the filter to view all trades, wins, or losses.
-5. Review the statistics and notes to learn from each result.
+TradeJournal is for a student who is learning how to trade stocks, cryptocurrency, forex, or other assets. When the student opens the app, they want to quickly log a completed trade or review previous trades to find patterns in their results and mistakes.
 
-## Current features
+## Sections or routes this app needs
 
-- Log a completed trade.
-- View trades from newest to oldest.
-- Edit and delete trade entries.
-- Filter entries by wins and losses.
-- Switch to a monthly calendar view that marks winning days green and losing days red.
-- Show total trades, wins, losses, win rate, and estimated profit/loss.
-- Save demo entries in browser local storage.
-- Provide a PostgreSQL schema and Express API for permanent storage.
-- Use a responsive layout for desktop and mobile.
+TradeJournal is a single-page React application with these main sections:
 
-## Database design
+| # | Section | What it is for |
+| --- | --- | --- |
+| 1 | Dashboard / performance overview | Shows the trader's win rate, win streak, average win-to-loss ratio, net profit or loss, and charts that summarize performance. |
+| 2 | Monthly calendar | Shows the selected month's trading activity and makes winning, losing, and mixed-result days easy to spot. |
+| 3 | Trade entry | Lets the user add a new completed trade or edit an existing one with its prices, size, result, date, and notes. |
+| 4 | Trade journal | Displays saved trade entries, lets the user filter them by all trades, wins, or losses, and provides edit and delete controls. |
 
-The main database item is a **trade**. PostgreSQL stores these records so data remains available after closing the browser and can be sorted, updated, deleted, and summarized.
+## State: what data does the app hold?
 
-| Field | Purpose |
-| --- | --- |
-| `id` | Unique ID for each trade |
-| `ticker` | Stock, cryptocurrency, forex pair, or other asset |
-| `entry_price` | Price when the trade opened |
-| `exit_price` | Price when the trade closed |
-| `position_size` | Shares, units, or contracts traded |
-| `trade_date` | Date of the trade |
-| `outcome` | `win` or `loss` |
-| `notes` | Setup, reason, mistake, or lesson |
-| `created_at` | Date and time the journal entry was saved |
+The most important screen is the dashboard because it combines the saved trade data with the journal and performance summaries.
 
-## Technology
+| Data | Shape (rough) | Who owns it (which component) | Changes when... |
+| --- | --- | --- | --- |
+| Trades | `[{ id, ticker, entry_price, exit_price, position_size, trade_date, outcome, notes }]` | `App` | the app loads, or the user adds, edits, or deletes a trade. |
+| Trade form | `{ ticker, entryPrice, exitPrice, positionSize, tradeDate, outcome, notes }` | `App` | the user types into the trade-entry form or selects an outcome. |
+| Editing trade ID | `number \| null` | `App` | the user selects Edit, saves changes, or cancels editing. |
+| Journal filter | `'all' \| 'win' \| 'loss'` | `App` | the user chooses which trade results to view. |
+| Calendar month | `Date` | `App` | the user selects the previous or next month. |
+| Loading, saving, and error status | strings, booleans, and `Error \| null` | `App` | trade data is loading, a form is submitting, or an API request fails. |
 
-- **Frontend:** React and Vite
-- **Backend:** Node.js and Express
-- **Database:** PostgreSQL
-- **Local demo mode:** browser local storage
-- **Deployment plan:** GitHub Pages for the frontend and separate hosting for the API and PostgreSQL database
+The calculated statistics, charts, and calendar summaries are derived from the `trades` state, so they do not need to be stored separately.
 
-## Next steps
+## What each screen contains
 
-- Install and connect PostgreSQL locally.
-- Test all create, read, update, and delete API actions with the real database.
-- Add filtering by ticker and date.
-- Add charts for win rate and performance over time.
-- Add support for trade direction and fees so profit/loss is more accurate.
+- Screen: Dashboard / performance overview
+  - Block 1: A top navigation bar with the TradeJournal name, links to the dashboard sections, and an Add Trade button.
+  - Block 2: Summary cards for the current win streak, win rate, and average win-to-loss ratio.
+  - Block 3: A monthly calendar that marks days containing wins, losses, or both.
+  - Block 4: A WaveScore radar summary and small charts for monthly trade count and balance.
+  - Block 5: A performance summary with net profit/loss and total wins versus losses.
+
+## Content you need to gather
+
+- Sample trade records with realistic tickers, dates, entry and exit prices, position sizes, outcomes, and notes.
+- Clear labels and short helper text for the trade-entry form and performance statistics.
+- A TradeJournal wordmark or simple logo treatment for the header.
+- A PostgreSQL database connection for the full version, plus seeded sample data for testing.
+- Screenshots of the finished desktop and mobile layouts for the documentation.
+
+## One risk
+
+The part I am least sure about is making the calculated analytics accurate and understandable, especially the running balance chart, win-to-loss ratio, and calendar results when there are multiple trades on the same day. I will test these calculations with known sample trades before relying on the displayed values.

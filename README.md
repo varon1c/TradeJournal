@@ -1,5 +1,7 @@
 # TradeJournal
 
+A fast, responsive web application for logging daily trades, tracking performance metrics, and reviewing risk management.
+
 ## 1. Overview
 
 TradeJournal is a personal web application for recording completed trades and reviewing trading performance over time. It is designed for a student learning trading who needs one organized place to review trade setups, wins, losses, and mistakes instead of relying on memory or scattered notes.
@@ -18,8 +20,8 @@ The app stores trade records with PostgreSQL, serves them through an Express API
 ### Get the code
 
 ```powershell
-git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-cd YOUR-REPOSITORY
+git clone https://github.com/varon1c/TradeJournal.git
+cd TradeJournal
 ```
 
 ### Install dependencies
@@ -163,11 +165,7 @@ compose.yml              Optional Docker Compose setup for PostgreSQL and the AP
 
 ## 6. Screenshots
 
-Add a screenshot of the running dashboard at `docs/assets/tradejournal-dashboard.png`, then replace the line below with the image.
-
-```md
-![TradeJournal dashboard](docs/assets/tradejournal-dashboard.png)
-```
+![TradeJournal dashboard](assets/demoo_desktop.png)
 
 ## 7. Known issues and next steps
 
