@@ -4,10 +4,17 @@
 // you can build the interface before this has anywhere to point.
 
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
+const isNgrok = /\.ngrok(?:-free)?\.dev$/i.test(new URL(BASE || window.location.origin).hostname)
 
 async function request(path, options) {
   const response = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    // ngrok's free development endpoints show an HTML warning to browser
+    // requests unless this header is present. It is harmless elsewhere and
+    // is sent only when the configured API host is an ngrok domain.
+    headers: {
+      'Content-Type': 'application/json',
+      ...(isNgrok ? { 'ngrok-skip-browser-warning': 'true' } : {}),
+    },
     ...options,
   })
 

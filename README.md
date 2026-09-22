@@ -2,6 +2,9 @@
 
 A fast, responsive web application for logging daily trades, tracking performance metrics, and reviewing risk management.
 
+A fast, responsive web application for logging daily trades, tracking performance metrics, and reviewing risk management.
+
+Live site: https://varon1c.github.io/TradeJournal/ Live API (temporary): - Demo video: (link — to be added before finals)
 ## 1. Overview
 
 TradeJournal is a personal web application for recording completed trades and reviewing trading performance over time. It is designed for a student learning trading who needs one organized place to review trade setups, wins, losses, and mistakes instead of relying on memory or scattered notes.
@@ -165,9 +168,13 @@ compose.yml              Optional Docker Compose setup for PostgreSQL and the AP
 
 ## 6. Screenshots
 
-![TradeJournal dashboard](assets/demoo_desktop.png)
+Add a screenshot of the running dashboard at `docs/assets/tradejournal-dashboard.png`, then replace the line below with the image.
 
-## 7. Known issues and next steps
+```md
+![TradeJournal dashboard](docs/assets/tradejournal-dashboard.png)
+```
+
+## 8. Known issues and next steps
 
 - The PostgreSQL schema and API are complete, but the database still needs to be installed, configured, and tested locally on the development computer.
 - Demo mode uses local storage only; it is not shared between browsers or users.
@@ -182,6 +189,8 @@ compose.yml              Optional Docker Compose setup for PostgreSQL and the AP
 - Slides: Pending
 - Square image: Pending
 
-## Project documents
+Author & Licence
+Built by Charles Jansen V. Manusig (@varon1c) — HAU · 6APSI Final Project. MIT License.
 
-Additional coursework documents are in [docs/](docs/README.md).
+
+
