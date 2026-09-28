@@ -6,23 +6,8 @@ This document is the low-fidelity plan for TradeJournal. It focuses on boxes, la
 
 The first screen is the **Dashboard**. It is the home base for reviewing performance, changing the calendar month, and moving into the trade-entry and journal sections.
 
-```text
-[Dashboard]
-  |  click "Add trade" / "Journal"
-  v
-[Trade Entry]
-  |  click "Add to journal" / "Save changes"
-  v
-[Trade Journal]
-  |  click "Edit"
-  v
-[Edit Trade]
-  |  click "Save changes" or "Cancel"
-  v
-[Trade Journal] ---- click "Performance" ----> [Dashboard]
-  |
-  +---- click previous / next month ----> [Dashboard: changed calendar month]
-```
+<img width="537" height="520" alt="Untitled1" src="https://github.com/user-attachments/assets/8dc35d5b-fd90-48f7-b797-fbb1ffefdba7" />
+
 
 | Question | Answer |
 | --- | --- |
