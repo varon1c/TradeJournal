@@ -34,7 +34,16 @@ const cookieOptions = {
   path: '/',
 }
 
-app.use(cors({ origin: allowedOrigins, credentials: true }))
+app.use(cors({
+  origin(origin, callback) {
+    // Requests without an Origin header include direct health checks and tools.
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
+    const error = new Error('This website is not allowed to call the API.')
+    error.status = 403
+    callback(error)
+  },
+  credentials: true,
+}))
 app.use(express.json({ limit: '100kb' }))
 app.use(cookieParser())
 
@@ -51,7 +60,7 @@ function signIn(response, user) {
 
 function requireAuth(request, response, next) {
   const token = request.cookies.tradejournal_token
-  if (!token) return response.status(401).json({ error: 'Authentication required' })
+  if (!token) return response.status(401).json({ error: 'Please sign in to access your trade journal.' })
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET)
@@ -60,7 +69,7 @@ function requireAuth(request, response, next) {
     next()
   } catch {
     response.clearCookie('tradejournal_token', { ...cookieOptions, maxAge: undefined })
-    return response.status(401).json({ error: 'Session expired or invalid' })
+    return response.status(401).json({ error: 'Your session has expired. Please sign in again.' })
   }
 }
 
@@ -170,7 +179,7 @@ app.get('/api/trades', requireAuth, async (request, response, next) => {
 app.get('/api/trades/:id', requireAuth, async (request, response, next) => {
   try {
     const row = await trades.getById(pool, request.params.id, request.user.id)
-    if (!row) return response.status(404).json({ error: 'Not found' })
+    if (!row) return response.status(404).json({ error: 'Trade not found, or you do not have access to it.' })
     response.json(row)
   } catch (error) {
     next(error)
@@ -194,7 +203,7 @@ app.put('/api/trades/:id', requireAuth, async (request, response, next) => {
 
   try {
     const row = await trades.update(pool, request.params.id, request.user.id, value)
-    if (!row) return response.status(404).json({ error: 'Not found' })
+    if (!row) return response.status(404).json({ error: 'Trade not found, or you do not have access to it.' })
     response.json(row)
   } catch (error) {
     next(error)
@@ -204,7 +213,7 @@ app.put('/api/trades/:id', requireAuth, async (request, response, next) => {
 app.delete('/api/trades/:id', requireAuth, async (request, response, next) => {
   try {
     const removed = await trades.remove(pool, request.params.id, request.user.id)
-    if (!removed) return response.status(404).json({ error: 'Not found' })
+    if (!removed) return response.status(404).json({ error: 'Trade not found, or it may already have been deleted.' })
     response.status(204).end()
   } catch (error) {
     next(error)
@@ -212,14 +221,21 @@ app.delete('/api/trades/:id', requireAuth, async (request, response, next) => {
 })
 
 app.use((request, response) => {
-  response.status(404).json({ error: 'No such route' })
+  response.status(404).json({ error: 'This API route does not exist.' })
 })
 
 // The detail goes in your logs; the visitor gets a plain message. Sending a
 // stack trace to a stranger tells them about your file layout and dependencies.
 app.use((error, request, response, next) => {
   console.error(error)
-  response.status(500).json({ error: 'Something went wrong on the server' })
+  if (error instanceof SyntaxError && 'body' in error) {
+    return response.status(400).json({ error: 'The request contains invalid JSON.' })
+  }
+  if (error.status === 403) return response.status(403).json({ error: error.message })
+  if (typeof error.code === 'string' && error.code.startsWith('08')) {
+    return response.status(503).json({ error: 'The database is temporarily unavailable. Please try again shortly.' })
+  }
+  response.status(500).json({ error: 'We could not complete that request. Please try again.' })
 })
 
 // The host chooses the port and tells you through PORT. Hardcoding 3000 is the
