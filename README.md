@@ -2,7 +2,8 @@
 
 TradeJournal is a responsive personal trading journal for recording completed trades, reviewing performance, and learning from wins and losses.
 
-Demo: https://varon1c.github.io/TradeJournal/ Live API (temporary): https://tradejournal-b21j.onrender.com/healthz  Deployed Site: tradejournalvaron1c.vercel.app Demo video: (link — to be added before finals)
+**Live site:** https://tradejournalvaron1c.vercel.app
+**Live API health check:** https://tradejournal-b21j.onrender.com/healthz
 
 ## What it does
 
