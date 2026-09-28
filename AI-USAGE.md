@@ -79,8 +79,8 @@ This project was built with AI assistance. This record describes the assistance 
 
 ### Written by me (varon1c)
 
-- **File:** docs/01-proposal.md , docs/02-mockup.md, docs/03-design-system.md , docs/04-wireframes-component-breakdown.md
-- **What it does and why it is built this way:** I created these md files which represent the start of the system foundation. i created the wireframes and the color codes myself to ensure the accuracy of the website to ensure that it is not painful in eyes of the users.
+- **File:** `docs/01-proposal.md`, `docs/02-mockup.md`, `docs/03-design-system.md`, `docs/04-wireframes-component-breakdown.md`, and parts of `client/src/styles.css`
+- **What it does and why it is built this way:** I created these documentation files as the foundation of the system. I made the wireframes and selected the color codes myself to keep the website visually consistent, readable, and comfortable for users. I also wrote parts of the CSS to apply the design system to the website, including the layout, colors, spacing, responsive styling, and dashboard appearance.
 
 ### The AI-written part I understand best
 
