@@ -6,8 +6,16 @@
 -- rather than by connecting to a server. It is also what lets you move to a
 -- hosted database in one command.
 
+CREATE TABLE IF NOT EXISTS users (
+  id            SERIAL PRIMARY KEY,
+  email         VARCHAR(254) NOT NULL UNIQUE,
+  password_hash TEXT         NOT NULL,
+  created_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS trades (
   id            SERIAL PRIMARY KEY,
+  user_id       INTEGER        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   ticker        VARCHAR(20)    NOT NULL,
   entry_price   NUMERIC(14, 4) NOT NULL CHECK (entry_price >= 0),
   exit_price    NUMERIC(14, 4) NOT NULL CHECK (exit_price >= 0),
@@ -21,4 +29,4 @@ CREATE TABLE IF NOT EXISTS trades (
 -- The list page always sorts newest first. Without this the database reads
 -- every row and sorts it on each request.
 CREATE INDEX IF NOT EXISTS trades_trade_date_idx
-  ON trades (trade_date DESC, created_at DESC);
+  ON trades (user_id, trade_date DESC, created_at DESC);

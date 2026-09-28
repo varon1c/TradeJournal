@@ -34,3 +34,7 @@ export const {
   updateTrade,
   deleteTrade,
 } = implementation
+
+// Authentication always uses the real Express API. Set VITE_USE_MOCK_API=false
+// when using this flow; the mock API has no server-side security boundary.
+export const { register, login, getCurrentUser, logout } = httpApi

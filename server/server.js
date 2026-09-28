@@ -1,7 +1,11 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 import { pool } from './db/pool.js'
 import * as trades from './sightingsRepo.js'
+import * as users from './usersRepo.js'
 
 const app = express()
 
@@ -16,8 +20,57 @@ const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
   .map((origin) => origin.trim())
   .filter(Boolean)
 
-app.use(cors({ origin: allowedOrigins }))
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error('JWT_SECRET must be set to a random value at least 32 characters long.')
+  process.exit(1)
+}
+
+const isProduction = process.env.NODE_ENV === 'production'
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: process.env.COOKIE_SAME_SITE || 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: '/',
+}
+
+app.use(cors({ origin: allowedOrigins, credentials: true }))
 app.use(express.json({ limit: '100kb' }))
+app.use(cookieParser())
+
+function publicUser(user) {
+  return { id: user.id, email: user.email, createdAt: user.created_at }
+}
+
+function signIn(response, user) {
+  const token = jwt.sign({ sub: user.id, email: user.email }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  })
+  response.cookie('tradejournal_token', token, cookieOptions)
+}
+
+function requireAuth(request, response, next) {
+  const token = request.cookies.tradejournal_token
+  if (!token) return response.status(401).json({ error: 'Authentication required' })
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET)
+    request.user = { id: Number(payload.sub), email: payload.email }
+    if (!Number.isInteger(request.user.id)) throw new Error('Invalid token subject')
+    next()
+  } catch {
+    response.clearCookie('tradejournal_token', { ...cookieOptions, maxAge: undefined })
+    return response.status(401).json({ error: 'Session expired or invalid' })
+  }
+}
+
+function validateCredentials(body) {
+  const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
+  const password = typeof body.password === 'string' ? body.password : ''
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return { error: 'Enter a valid email address' }
+  if (password.length < 12 || password.length > 128) return { error: 'Password must be 12–128 characters' }
+  return { email, password }
+}
 
 // Is the process alive?
 app.get('/healthz', (request, response) => {
@@ -34,6 +87,49 @@ app.get('/readyz', async (request, response) => {
     console.error('readyz failed:', error.message)
     response.status(503).json({ ok: false, db: 'down' })
   }
+})
+
+app.post('/api/auth/register', async (request, response, next) => {
+  const credentials = validateCredentials(request.body ?? {})
+  if (credentials.error) return response.status(400).json({ error: credentials.error })
+
+  try {
+    if (await users.findByEmail(pool, credentials.email)) {
+      return response.status(409).json({ error: 'An account with that email already exists' })
+    }
+    const passwordHash = await bcrypt.hash(credentials.password, 12)
+    const user = await users.create(pool, { email: credentials.email, passwordHash })
+    signIn(response, user)
+    response.status(201).json({ user: publicUser(user) })
+  } catch (error) {
+    if (error.code === '23505') return response.status(409).json({ error: 'An account with that email already exists' })
+    next(error)
+  }
+})
+
+app.post('/api/auth/login', async (request, response, next) => {
+  const credentials = validateCredentials(request.body ?? {})
+  if (credentials.error) return response.status(400).json({ error: credentials.error })
+
+  try {
+    const user = await users.findByEmail(pool, credentials.email)
+    if (!user || !(await bcrypt.compare(credentials.password, user.password_hash))) {
+      return response.status(401).json({ error: 'Invalid email or password' })
+    }
+    signIn(response, user)
+    response.json({ user: publicUser(user) })
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.get('/api/auth/me', requireAuth, (request, response) => {
+  response.json({ user: request.user })
+})
+
+app.post('/api/auth/logout', (request, response) => {
+  response.clearCookie('tradejournal_token', { ...cookieOptions, maxAge: undefined })
+  response.status(204).end()
 })
 
 // Validation lives on the server because the client can be bypassed. The
@@ -63,17 +159,17 @@ function validate(body) {
   return { errors, value: { ticker, entryPrice, exitPrice, positionSize, tradeDate, outcome, notes } }
 }
 
-app.get('/api/trades', async (request, response, next) => {
+app.get('/api/trades', requireAuth, async (request, response, next) => {
   try {
-    response.json(await trades.getAll(pool))
+    response.json(await trades.getAll(pool, request.user.id))
   } catch (error) {
     next(error)
   }
 })
 
-app.get('/api/trades/:id', async (request, response, next) => {
+app.get('/api/trades/:id', requireAuth, async (request, response, next) => {
   try {
-    const row = await trades.getById(pool, request.params.id)
+    const row = await trades.getById(pool, request.params.id, request.user.id)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
@@ -81,23 +177,23 @@ app.get('/api/trades/:id', async (request, response, next) => {
   }
 })
 
-app.post('/api/trades', async (request, response, next) => {
+app.post('/api/trades', requireAuth, async (request, response, next) => {
   const { errors, value } = validate(request.body ?? {})
   if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
 
   try {
-    response.status(201).json(await trades.create(pool, value))
+    response.status(201).json(await trades.create(pool, request.user.id, value))
   } catch (error) {
     next(error)
   }
 })
 
-app.put('/api/trades/:id', async (request, response, next) => {
+app.put('/api/trades/:id', requireAuth, async (request, response, next) => {
   const { errors, value } = validate(request.body ?? {})
   if (errors.length > 0) return response.status(400).json({ error: errors.join('; ') })
 
   try {
-    const row = await trades.update(pool, request.params.id, value)
+    const row = await trades.update(pool, request.params.id, request.user.id, value)
     if (!row) return response.status(404).json({ error: 'Not found' })
     response.json(row)
   } catch (error) {
@@ -105,9 +201,9 @@ app.put('/api/trades/:id', async (request, response, next) => {
   }
 })
 
-app.delete('/api/trades/:id', async (request, response, next) => {
+app.delete('/api/trades/:id', requireAuth, async (request, response, next) => {
   try {
-    const removed = await trades.remove(pool, request.params.id)
+    const removed = await trades.remove(pool, request.params.id, request.user.id)
     if (!removed) return response.status(404).json({ error: 'Not found' })
     response.status(204).end()
   } catch (error) {

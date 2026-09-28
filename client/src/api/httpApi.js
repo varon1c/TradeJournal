@@ -8,14 +8,16 @@ const isNgrok = /\.ngrok(?:-free)?\.dev$/i.test(new URL(BASE || window.location.
 
 async function request(path, options) {
   const response = await fetch(`${BASE}${path}`, {
+    credentials: 'include',
     // ngrok's free development endpoints show an HTML warning to browser
     // requests unless this header is present. It is harmless elsewhere and
     // is sent only when the configured API host is an ngrok domain.
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(isNgrok ? { 'ngrok-skip-browser-warning': 'true' } : {}),
+      ...options?.headers,
     },
-    ...options,
   })
 
   if (!response.ok) {
@@ -43,3 +45,13 @@ export const updateTrade = (id, input) =>
 
 export const deleteTrade = (id) =>
   request(`/api/trades/${id}`, { method: 'DELETE' })
+
+export const register = (input) =>
+  request('/api/auth/register', { method: 'POST', body: JSON.stringify(input) })
+
+export const login = (input) =>
+  request('/api/auth/login', { method: 'POST', body: JSON.stringify(input) })
+
+export const getCurrentUser = () => request('/api/auth/me')
+
+export const logout = () => request('/api/auth/logout', { method: 'POST' })
