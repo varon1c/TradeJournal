@@ -11,186 +11,153 @@ TradeJournal is a personal web application for recording completed trades and re
 
 The app stores trade records with PostgreSQL, serves them through an Express API, and displays them in a React dashboard. It can also run in browser-only demo mode while a real database is being set up.
 
-## 2. Setup and installation
+## Frontend and backend
 
-### Requirements
+- Frontend: React 18, Vite, React Router
+- Backend: Node.js, Express
+- Database: Neon serverless PostgreSQL
 
-- [Node.js](https://nodejs.org/) 20 or newer
-- PostgreSQL 17 or newer for the full database version
-- Git
-- A terminal such as PowerShell or the VS Code integrated terminal
+## Requirements
 
-### Get the code
+- Node.js 20 or newer
+- A Neon PostgreSQL database (or a local PostgreSQL database for development)
+
+## Install
 
 ```powershell
 git clone https://github.com/varon1c/TradeJournal.git
 cd TradeJournal
+
+cd server
+npm install
+cd ..\client
+npm install
 ```
 
-### Install dependencies
+## Configure Neon and authentication
 
-Install the server and client dependencies separately:
+Never commit `.env` files. They contain database credentials and the JWT signing secret.
+
+```powershell
+Copy-Item server\.env.example server\.env
+Copy-Item client\.env.example client\.env
+```
+
+In `server/.env`, add the Neon connection string copied from the Neon dashboard and a unique JWT secret:
+
+```env
+DATABASE_URL=postgresql://USER:PASSWORD@YOUR-ENDPOINT.neon.tech/neondb?sslmode=require
+CORS_ORIGINS=http://localhost:5173
+JWT_SECRET=replace-with-a-long-random-secret
+JWT_EXPIRES_IN=7d
+COOKIE_SAME_SITE=lax
+NODE_ENV=development
+```
+
+Generate a secure JWT secret:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+Set `client/.env` to use the real API:
+
+```env
+VITE_USE_MOCK_API=false
+# Leave blank locally: Vite proxies /api to localhost:3000.
+VITE_API_BASE_URL=
+```
+
+Create the tables in Neon:
 
 ```powershell
 cd server
-npm install
-cd ../client
-npm install
-cd ..
+npm run db:schema
 ```
 
-### Environment and configuration
+The schema creates `users` and `trades`. Every trade belongs to a user, so one authenticated user cannot read, edit, or delete another user's journal.
 
-Never commit real passwords or connection strings. Create the local `.env` files from the supplied examples.
+## Run locally
 
-**Server:** copy `server/.env.example` to `server/.env`.
+Open two terminals.
 
-| Variable | Example value | Purpose |
-| --- | --- | --- |
-| `DATABASE_URL` | `postgres://postgres:your_password@localhost:5432/tradejournal` | PostgreSQL connection string. |
-| `CORS_ORIGINS` | `http://localhost:5173` | Frontend origin allowed to call the API. |
-| `NODE_ENV` | `development` | Server environment. |
-| `PORT` | `3000` | Optional local API port; deployment hosts normally provide this automatically. |
-
-**Client:** copy `client/.env.example` to `client/.env`.
-
-| Variable | Example value | Purpose |
-| --- | --- | --- |
-| `VITE_USE_MOCK_API` | `false` | Set to `false` for PostgreSQL/API mode; set to `true` for browser-only demo mode. |
-| `VITE_API_BASE_URL` | `http://localhost:3000` | Public base URL for the Express API. |
-
-On Windows PowerShell, create the files with:
-
-```powershell
-Copy-Item server/.env.example server/.env
-Copy-Item client/.env.example client/.env
-```
-
-### Set up and seed the database
-
-1. Create a PostgreSQL database named `tradejournal`:
-
-   ```powershell
-   createdb tradejournal
-   ```
-
-2. Add the database connection string to `server/.env`.
-
-3. Create the `trades` table and load the sample entries:
-
-   ```powershell
-   cd server
-   npm run db:reset
-   ```
-
-`db:reset` runs [server/db/schema.sql](server/db/schema.sql) and [server/db/seed.sql](server/db/seed.sql). The seed script clears existing local trade records, so only use it for development data.
-
-## 3. How to run it
-
-### Full version: React, Express, and PostgreSQL
-
-With PostgreSQL running and the setup above completed, open two terminals.
-
-**Terminal 1 — API**
+**API**
 
 ```powershell
 cd server
 npm run dev
 ```
 
-The API should start at `http://localhost:3000`. Visiting `http://localhost:3000/healthz` should return `{"ok":true}`.
-
-**Terminal 2 — client**
-
-Make sure `client/.env` includes:
-
-```env
-VITE_USE_MOCK_API=false
-VITE_API_BASE_URL=http://localhost:3000
-```
-
-Then run:
+**Frontend**
 
 ```powershell
 cd client
 npm run dev
 ```
 
-Open `http://localhost:5173`. You should see the TradeJournal dashboard with trade statistics, a **Log a trade** form, and the trade journal list.
+Open the Vite URL, normally `http://localhost:5173`. Create an account, then sign in to access the journal.
 
-### Demo mode: no PostgreSQL required
-
-To run only the interface, set this in `client/.env`:
-
-```env
-VITE_USE_MOCK_API=true
-```
-
-Then run `npm run dev` in `client`. This mode saves trades in that browser's local storage; data is not shared and is deleted if browser storage is cleared.
-
-## 4. Features and usage
-
-1. Open the dashboard at `http://localhost:5173`.
-2. In **Log a trade**, enter a ticker or asset, entry price, exit price, position size, date, outcome, and optional setup notes.
-3. Select **Add to journal**. The new entry appears in the journal and the statistics update.
-4. Use the journal filter to show all trades, wins, or losses.
-5. Select **Edit** to correct a trade, or **Delete** to remove an entry.
-
-The dashboard opens with an analytics view: a winstreak card, win-rate gauge, average win/loss ratio, monthly calendar, WaveScore radar, trade-count trend, and balance trend. These values are calculated from saved trades. Estimated profit/loss is calculated as `(exit price − entry price) × position size`.
-
-### API endpoints
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| `GET` | `/healthz` | Confirms the Express process is running. |
-| `GET` | `/readyz` | Confirms PostgreSQL is reachable. |
-| `GET` | `/api/trades` | Returns all trades, newest first. |
-| `GET` | `/api/trades/:id` | Returns one trade. |
-| `POST` | `/api/trades` | Creates a trade. |
-| `PUT` | `/api/trades/:id` | Updates a trade. |
-| `DELETE` | `/api/trades/:id` | Deletes a trade. |
-
-## 5. Project structure
+Useful health checks:
 
 ```text
-client/                  React and Vite frontend
-  src/App.jsx            Dashboard, trade form, statistics, and journal UI
-  src/api/               API clients for demo mode and the Express API
-  src/styles.css         Responsive styles
-server/                  Express API
-  server.js              Routes, validation, CORS, and server startup
-  sightingsRepo.js       Parameterized PostgreSQL queries for trades
-  db/schema.sql          PostgreSQL trades table and index
-  db/seed.sql            Sample development trades
-docs/                    Proposal, design, weekly reports, and other coursework docs
-compose.yml              Optional Docker Compose setup for PostgreSQL and the API
+http://localhost:3000/healthz  # Express process
+http://localhost:3000/readyz   # Neon/PostgreSQL connection
 ```
 
-## 6. Screenshots
+## Authentication
 
-Add a screenshot of the running dashboard at `docs/assets/tradejournal-dashboard.png`, then replace the line below with the image.
+- `POST /api/auth/register` creates a user after validating the email and password.
+- Passwords are hashed with bcrypt; plaintext passwords are never stored.
+- `POST /api/auth/login` verifies the password and sets a signed JWT in an `HttpOnly` cookie.
+- `GET /api/auth/me` restores the signed-in user when the page reloads.
+- `POST /api/auth/logout` clears the cookie.
+- All `/api/trades` routes require a valid session on the server, not just in the React UI.
 
-```md
-![TradeJournal dashboard](docs/assets/tradejournal-dashboard.png)
+For production, use HTTPS and set `NODE_ENV=production`. Keep `COOKIE_SAME_SITE=lax` when the frontend and API are same-site. If they are truly cross-site, use `COOKIE_SAME_SITE=none` with HTTPS and add CSRF protection.
+
+## API endpoints
+
+| Method | Path | Authentication | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/healthz` | No | Confirms Express is running. |
+| `GET` | `/readyz` | No | Confirms PostgreSQL is reachable. |
+| `POST` | `/api/auth/register` | No | Creates an account and signs the user in. |
+| `POST` | `/api/auth/login` | No | Signs the user in. |
+| `GET` | `/api/auth/me` | Yes | Returns the current user. |
+| `POST` | `/api/auth/logout` | No | Clears the session cookie. |
+| `GET` | `/api/trades` | Yes | Lists the signed-in user's trades. |
+| `POST` | `/api/trades` | Yes | Creates a trade for the signed-in user. |
+| `GET` | `/api/trades/:id` | Yes | Returns one owned trade. |
+| `PUT` | `/api/trades/:id` | Yes | Updates one owned trade. |
+| `DELETE` | `/api/trades/:id` | Yes | Deletes one owned trade. |
+
+## Project structure
+
+```text
+client/                         React/Vite frontend
+  src/App.jsx                   Protected routes and dashboard
+  src/components/Login.jsx      Sign-in form
+  src/components/SignUp.jsx     Account-creation form
+  src/api/                      HTTP and mock API clients
+server/                         Express API
+  server.js                     Routes, JWT middleware, CORS, validation
+  usersRepo.js                  Parameterized users queries
+  sightingsRepo.js              Parameterized, user-scoped trade queries
+  db/pool.js                    PostgreSQL/Neon connection pool
+  db/schema.sql                 Users and trades schema
 ```
 
-## 8. Known issues and next steps
+## Deployment
 
-- The PostgreSQL schema and API are complete, but the database still needs to be installed, configured, and tested locally on the development computer.
-- Demo mode uses local storage only; it is not shared between browsers or users.
-- The estimated profit/loss calculation assumes a long position. A future version should support long/short trade direction and fees.
-- Add search or filtering by ticker and date.
-- Add charts to show performance and win rate over time.
-- Capture and add a real screenshot after running the app.
+The GitHub Pages workflow builds and deploys the frontend when `main` changes. Configure its public values in GitHub Actions variables:
 
-## Presentation
+- `VITE_USE_MOCK_API=false`
+- `VITE_API_BASE_URL=https://your-api-host.example`
 
-- Video: Pending
-- Slides: Pending
-- Square image: Pending
+Deploy the Express server separately and add `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGINS`, `NODE_ENV=production`, and `COOKIE_SAME_SITE` in the server host's secret/environment-variable dashboard. Do not add these server secrets to GitHub Actions variables or frontend environment variables.
 
-Author & Licence
-Built by Charles Jansen V. Manusig (@varon1c) — HAU · 6APSI Final Project. MIT License.
+## License
 
+MIT. Built by Charles Jansen V. Manusig (@varon1c), HAU 6APSI Final Project.
 
 
