@@ -4,7 +4,7 @@ TradeJournal is a responsive personal trading journal for recording completed tr
 
 **Live site:** https://tradejournalvaron1c.vercel.app
 **Live API health check:** https://tradejournal-b21j.onrender.com/healthz
-**AI usage** AI-USAGE.md
+**AI usage** [AI-USAGE.md](https://github.com/varon1c/TradeJournal/blob/main/AI-USAGE.md)
 
 ## What it does
 
