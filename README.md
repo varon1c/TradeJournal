@@ -2,6 +2,8 @@
 
 # TradeJournal
 [![Made with AI](https://img.shields.io/badge/Made_with-AI_assistance-blue)](AI-USAGE.md)
+
+
 TradeJournal is a responsive personal trading journal for recording completed trades, reviewing performance, and learning from wins and losses.
 
 **Live site:** https://tradejournalvaron1c.vercel.app
