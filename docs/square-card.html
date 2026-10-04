@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TradeJournal — 1080x1080 Social Media Presentation Card</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0b0d11;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    .controls {
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: center;
+      max-width: 1080px;
+    }
+    .btn {
+      background: #10b981;
+      color: #04130d;
+      border: none;
+      padding: 0.65rem 1.4rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: #34d399;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+    }
+    .screen-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 0.35rem 0.6rem;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .screen-btn {
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      padding: 0.5rem 0.9rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .screen-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+    .screen-btn.active { color: #04130d; background: #10b981; }
+
+    canvas {
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85);
+      max-width: 90vw;
+      max-height: 80vh;
+      aspect-ratio: 1 / 1;
+      background: #0f1117;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="controls">
+    <button class="btn" id="downloadBtn">📥 Download Square Image (.PNG)</button>
+    <div class="screen-selector" id="screenSelector">
+      <span style="color: #9ca3af; font-size: 0.85rem; margin-left: 0.4rem;">Screen:</span>
+    </div>
+  </div>
+
+  <canvas id="cardCanvas" width="1080" height="1080"></canvas>
+
+  <script>
+    // ============ EDIT THESE ============
+    const CONFIG = {
+      badge: 'FINAL PROJECT SHOWCASE',
+      name: 'TradeJournal',
+      tagline: 'Log your trades. Review your performance patterns.',
+      url: 'https://tradejournalvaron1c.vercel.app/',
+      logo: 'https://github.com/user-attachments/assets/d8884f31-02ad-4331-bd44-1a75ebec824e',
+      author: 'varon1c (@varon1c)',
+      authorSub: 'Holy Angel University · 6APSI Web Dev Final Project',
+      screens: [
+        { label: '📊 Dashboard', src: 'https://raw.githubusercontent.com/varon1c/TradeJournal/main/assets/Dashbooard.png' },
+        { label: '📝 Trade Log', src: 'https://raw.githubusercontent.com/varon1c/TradeJournal/main/assets/jourrnal.png' },
+        { label: '➕ Add Trade', src: 'https://raw.githubusercontent.com/varon1c/TradeJournal/main/assets/tradeentry.png' },
+        { label: '📈 Analytics', src: 'https://raw.githubusercontent.com/varon1c/TradeJournal/main/assets/analytics.png' }
+      ],
+      // Update to match your real stack
+      badges: [
+        { text: 'Full-Stack JS', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+        { text: 'React',         color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)' },
+        { text: 'Vercel',        color: '#e5e7eb', bg: 'rgba(229, 231, 235, 0.08)' }
+      ]
+    };
+    const ACCENT = '#10b981';
+    const ACCENT_LIGHT = '#34d399';
+    // ====================================
+
+    const canvas = document.getElementById('cardCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const logoImg = new Image();
+    logoImg.onload = drawCanvas;
+    logoImg.src = CONFIG.logo;
+
+    const screenshotImg = new Image();
+    screenshotImg.onload = drawCanvas;
+    screenshotImg.onerror = drawCanvas;
+
+    function switchScreenshot(src) { screenshotImg.src = src; drawCanvas(); }
+
+    // Build screen buttons
+    const selector = document.getElementById('screenSelector');
+    CONFIG.screens.forEach((s, i) => {
+      const b = document.createElement('button');
+      b.className = 'screen-btn' + (i === 0 ? ' active' : '');
+      b.textContent = s.label;
+      b.addEventListener('click', () => {
+        selector.querySelectorAll('.screen-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        switchScreenshot(s.src);
+      });
+      selector.appendChild(b);
+    });
+
+    // Download straight from the canvas
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      try {
+        const a = document.createElement('a');
+        a.download = 'TradeJournal-Square-1080x1080.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      } catch (e) {
+        alert('Browser blocked export (images loaded from file://). Open this page through a local server, e.g. "npx serve".');
+      }
+    });
+
+    function drawCanvas() {
+      ctx.clearRect(0, 0, 1080, 1080);
+
+      // 1. Solid dark background
+      ctx.fillStyle = '#0f1117';
+      ctx.fillRect(0, 0, 1080, 1080);
+
+      // 2. Header badge
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.15)';
+      ctx.strokeStyle = ACCENT;
+      ctx.lineWidth = 2;
+      roundRect(ctx, 75, 65, 340, 44, 22, true, true);
+      ctx.fillStyle = ACCENT_LIGHT;
+      ctx.font = 'bold 18px "Outfit", sans-serif';
+      ctx.fillText(CONFIG.badge, 98, 93);
+
+      // 3. Logo & title
+      if (logoImg.complete && logoImg.naturalWidth > 0) {
+        ctx.save();
+        roundRect(ctx, 75, 135, 100, 100, 20, false, false);
+        ctx.clip();
+        ctx.drawImage(logoImg, 75, 135, 100, 100);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = ACCENT;
+        roundRect(ctx, 75, 135, 100, 100, 20, true, false);
+        ctx.fillStyle = '#04130d';
+        ctx.font = '900 64px "Outfit", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(CONFIG.name.charAt(0), 125, 207);
+        ctx.textAlign = 'left';
+      }
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 70px "Outfit", sans-serif';
+      ctx.fillText(CONFIG.name, 195, 200);
+
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '500 23px "Inter", sans-serif';
+      ctx.fillText(CONFIG.tagline, 198, 238);
+
+      // 4. Browser mockup with screenshot
+      const cardX = 75, cardY = 275, cardW = 930, cardH = 590;
+
+      ctx.save();
+      roundRect(ctx, cardX, cardY, cardW, cardH, 20, false, false);
+      ctx.clip();
+
+      ctx.fillStyle = '#11141c';
+      ctx.fillRect(cardX, cardY, cardW, cardH);
+
+      const barH = 42;
+      ctx.fillStyle = '#1c202c';
+      ctx.fillRect(cardX, cardY, cardW, barH);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cardX, cardY + barH);
+      ctx.lineTo(cardX + cardW, cardY + barH);
+      ctx.stroke();
+
+      const dotY = cardY + 21;
+      drawCircle(ctx, cardX + 22, dotY, 6, '#ef4444');
+      drawCircle(ctx, cardX + 40, dotY, 6, '#f59e0b');
+      drawCircle(ctx, cardX + 58, dotY, 6, '#10b981');
+
+      const urlW = 380, urlH = 26;
+      const urlX = cardX + (cardW - urlW) / 2;
+      const urlY = cardY + 8;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+      roundRect(ctx, urlX, urlY, urlW, urlH, 13, true, false);
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '500 13px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(CONFIG.url, cardX + cardW / 2, urlY + 17);
+      ctx.textAlign = 'left';
+
+      const viewY = cardY + barH;
+      const viewH = cardH - barH;
+      if (screenshotImg.complete && screenshotImg.naturalWidth > 0) {
+        const img = screenshotImg;
+        const targetAspect = cardW / viewH;
+        const imgAspect = img.naturalWidth / img.naturalHeight;
+        let sX = 0, sY = 0, sW = img.naturalWidth, sH = img.naturalHeight;
+        if (imgAspect > targetAspect) {
+          sW = img.naturalHeight * targetAspect;
+          sX = (img.naturalWidth - sW) / 2;
+        } else {
+          sH = img.naturalWidth / targetAspect;
+        }
+        ctx.drawImage(img, sX, sY, sW, sH, cardX, viewY, cardW, viewH);
+      } else {
+        // Placeholder when a screenshot isn't found
+        ctx.fillStyle = '#141824';
+        ctx.fillRect(cardX, viewY, cardW, viewH);
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '600 22px "Inter", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Add your screenshot path in CONFIG.screens', cardX + cardW / 2, viewY + viewH / 2);
+        ctx.textAlign = 'left';
+      }
+      ctx.restore();
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, cardX, cardY, cardW, cardH, 20, false, true);
+
+      // 5. Footer
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 28px "Outfit", sans-serif';
+      ctx.fillText(CONFIG.author, 75, 952);
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '500 17px "Inter", sans-serif';
+      ctx.fillText(CONFIG.authorSub, 75, 985);
+
+      drawFooterBadges(ctx, 1005, 962);
+    }
+
+    function drawFooterBadges(ctx, startRightX, centerY) {
+      ctx.font = 'bold 16px "Inter", sans-serif';
+      let curRight = startRightX;
+      const gap = 12, pillH = 36;
+      [...CONFIG.badges].reverse().forEach(badge => {
+        const pillW = ctx.measureText(badge.text).width + 26;
+        const pillX = curRight - pillW;
+        const pillY = centerY - pillH / 2;
+        ctx.fillStyle = badge.bg;
+        ctx.strokeStyle = badge.color;
+        ctx.lineWidth = 1.5;
+        roundRect(ctx, pillX, pillY, pillW, pillH, 18, true, true);
+        ctx.fillStyle = badge.color;
+        ctx.fillText(badge.text, pillX + 13, centerY + 5);
+        curRight = pillX - gap;
+      });
+    }
+
+    function drawCircle(ctx, x, y, r, color) {
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+
+    function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      if (fill) ctx.fill();
+      if (stroke) ctx.stroke();
+    }
+
+    // Start: load fonts, then first screenshot, then draw
+    Promise.all([
+      document.fonts.load('bold 70px "Outfit"'),
+      document.fonts.load('500 20px "Inter"'),
+      document.fonts.load('bold 16px "Inter"')
+    ]).catch(() => {}).then(() => switchScreenshot(CONFIG.screens[0].src));
+  </script>
+</body>
+</html>
