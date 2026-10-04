@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { createTrade, deleteTrade, listTrades, updateTrade } from './api'
 import { getCurrentUser, logout } from './api'
+import trajouLogo from './assets/trajou-logo.png'
 import DemoNotice from './components/DemoNotice.jsx'
 import Login from './components/Login.jsx'
 import SignUp from './components/SignUp.jsx'
@@ -47,7 +48,7 @@ export function Dashboard({ user, onLogout }) {
 
   const radarScore = Math.round(Math.min(100, stats.winRate * .45 + Math.min(stats.total * 4, 25) + Math.min(stats.ratio * 12, 25))); const radarPoints = `150,42 ${220 + Math.min(stats.ratio * 7, 24)},91 194,170 106,170 ${80 - Math.min(stats.losses, 16)},91`
   return <main className="dashboard">
-    <header className="topbar"><a className="brand" href="#top">Trade<span>Journal</span></a><nav aria-label="Dashboard sections"><a href="#performance">Performance</a><a href="#trade-entry">Journal</a></nav><span className="user-email">{user.email}</span><button className="new-trade" onClick={() => document.getElementById('trade-entry')?.scrollIntoView({ behavior: 'smooth' })}>+ Add trade</button><button className="text-button" onClick={onLogout}>Sign out</button></header>
+    <header className="topbar"><a className="brand" href="#top" aria-label="TRAJOU dashboard"><img src={trajouLogo} alt="TRAJOU" /></a><nav aria-label="Dashboard sections"><a href="#performance">Performance</a><a href="#trade-entry">Journal</a></nav><span className="user-email">{user.email}</span><button className="new-trade" onClick={() => document.getElementById('trade-entry')?.scrollIntoView({ behavior: 'smooth' })}>+ Add trade</button><button className="text-button" onClick={onLogout}>Sign out</button></header>
     <div id="top" className="intro"><div><p className="eyebrow">TRADING INTELLIGENCE</p><h1>Your edge, <span>made visible.</span></h1></div><p>Review the habits behind every trade and make your next decision with more confidence.</p></div><DemoNotice />
     {error && <p className="error" role="alert">{error.message} <button onClick={load}>Try again</button></p>}
     <section className="metric-row" aria-label="Performance overview"><article className="panel streak-card"><p>Winstreak</p><div className="streak-stat"><strong>{stats.streak || '—'}<b>♨</b></strong><span>{stats.streakType === 'win' ? 'wins in a row' : stats.streakType === 'loss' ? 'losses to review' : 'start logging'}</span></div><div className="mini-split"><span><b>{stats.wins}</b> Wins</span><span><b>{stats.losses}</b> Losses</span></div></article><article className="panel winrate-card"><div><strong>{stats.winRate.toFixed(2)}%</strong><p>Winrate</p></div><div className="gauge" style={{ '--rate': `${stats.winRate * 3.6}deg` }} aria-label={`${stats.winRate.toFixed(0)} percent win rate`}><span>{stats.wins}/{stats.total}</span></div></article><article className="panel ratio-card"><strong>{stats.ratio.toFixed(2)}</strong><p>Avg Win / Avg Loss</p><div className="ratio-track"><i style={{ width: `${stats.avgWin + stats.avgLoss ? stats.avgWin / (stats.avgWin + stats.avgLoss) * 100 : 50}%` }} /></div><div className="ratio-labels"><span>{money(stats.avgWin)}</span><span>{money(stats.avgLoss)}</span></div></article></section>
