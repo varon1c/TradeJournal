@@ -1,7 +1,7 @@
 <img width="354" height="352" alt="Untitled" src="https://github.com/user-attachments/assets/d8884f31-02ad-4331-bd44-1a75ebec824e" />
 
 # TradeJournal
-
+[![Made with AI](https://img.shields.io/badge/Made_with-AI_assistance-blue)](AI-USAGE.md)
 TradeJournal is a responsive personal trading journal for recording completed trades, reviewing performance, and learning from wins and losses.
 
 **Live site:** https://tradejournalvaron1c.vercel.app
