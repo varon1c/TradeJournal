@@ -1,4 +1,5 @@
-<img width="2000" height="2000" alt="TRAJOU" src="https://github.com/user-attachments/assets/84038f74-0de4-434f-9eff-4f3a851b7320" />
+<img width="354" height="352" alt="Untitled" src="https://github.com/user-attachments/assets/d8884f31-02ad-4331-bd44-1a75ebec824e" />
+
 # TradeJournal
 
 TradeJournal is a responsive personal trading journal for recording completed trades, reviewing performance, and learning from wins and losses.
