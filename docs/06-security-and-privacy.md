@@ -1,69 +1,41 @@
-# Security and privacy checklist
+# Security and privacy — TradeJournal
 
-Work through this **before your first push**, and again before you submit. It is
-short, none of it is exotic, and a grader can check most of it in two minutes.
+Reviewed: 4 October 2026
 
-Your repository is public, in your own account, and permanent. That is the point
-of it, and it is also why this file exists.
+TradeJournal is a personal trading journal. It stores an account email and password hash, plus the trade entries created by that account: ticker, prices, position size, date, outcome, and optional notes. It is not intended to collect real classmates' data or financial-account credentials.
 
-## Before the first push
+## Repository and secrets
 
-- [ ] `.gitignore` includes `.env`, and `git check-ignore -v .env` confirms it
-- [ ] `git ls-files | grep -iE '\.env$|\.pem$|id_rsa'` prints nothing
-- [ ] `.env.example` is committed, with **placeholder** values only
-- [ ] No connection string, key or password anywhere in the repository,
-      including in a screenshot
-- [ ] No `student.json`, and no name, student number or email of yours or anyone
-      else's
+- [x] `.gitignore` ignores `.env` and `.env.*`, while retaining `.env.example`.
+- [x] Server and client environment templates are committed with placeholder values only.
+- [x] No tracked `.env`, PEM, or `id_rsa` file was found during the review.
+- [x] Database URLs and JWT secrets are documented as server-only values. `VITE_` variables are explicitly identified as public browser-build values.
+- [ ] Before each public push, run `git check-ignore -v .env` and inspect Git history for accidentally committed secrets. A leaked credential must be rotated at its provider before history cleanup.
 
-Deleting a file later does **not** remove it from the history. If you commit a
-credential, **rotate it first**, at the service, and clean up the history second.
-The rotation is the fix; the cleanup is hygiene.
+## Application controls checked
 
-## The application
+- [x] Passwords are validated server-side and hashed with bcrypt (cost factor 12). Plaintext passwords are not stored or returned.
+- [x] Authentication uses a signed JWT in an `HttpOnly` cookie. Cookies are marked `Secure` in production and have a seven-day expiry.
+- [x] The API validates credentials and trade input on the server, including email format, password length, ticker length, numeric values, valid dates, permitted outcomes, and a 2,000-character notes limit.
+- [x] JSON request bodies are limited to 100 KB.
+- [x] Database queries use PostgreSQL parameter placeholders and value arrays.
+- [x] Trade reads, updates, and deletes include the authenticated `user_id` in the query, preventing one signed-in user from accessing another user's entries.
+- [x] CORS uses the `CORS_ORIGINS` allowlist and enables credentials only for approved origins.
+- [x] Error responses are generic; stack traces and database details are written to server logs rather than returned to visitors.
+- [ ] Add `helmet` before production release to set standard security headers.
+- [ ] Add rate limiting to sign-up, login, and other expensive endpoints to reduce password-guessing and abuse.
+- [ ] Add CSRF protection before deploying with `COOKIE_SAME_SITE=none`, because the frontend and API may be on different sites.
+- [ ] Run `npm audit` in both `server/` and `client/`, review the results, and apply safe dependency updates before submission.
 
-- [ ] Every SQL query is parameterised. Values go in the array, never into the
-      string. This is one line of defence you already know how to do
-- [ ] Input is validated **on the server**, not only in React. Length limits on
-      every text field
-- [ ] `cors({ origin: allowedOrigins })` names your origins. Not `cors()` with no
-      options, which allows every site on the internet
-- [ ] `NODE_ENV=production` on the host, and no stack trace in any response body
-- [ ] `helmet` installed, which is one line for several real protections
-- [ ] Anything that costs money or accepts a password is rate limited
-- [ ] Passwords, if you have accounts, are hashed with bcrypt and never logged
-- [ ] Every route that touches somebody's data has the ownership check **in the
-      query**, as `AND user_id = $2`, not as an `if` above it
-- [ ] `npm audit` run once, and the easy fixes taken
+## Privacy commitments
 
-```bash
-npm install helmet
-```
+- [x] The checked seed file uses fictional, market-style sample trades rather than names, emails, photos, or real account data.
+- [x] The app should collect only the information required for an account and its private trade journal.
+- [x] Users' journal records are isolated by account at the API and database-query layers.
+- [ ] Before recording a demo video or publishing screenshots, remove real email addresses, trade notes, account balances, classmates' information, and any other personal data.
+- [ ] Add a short in-app privacy notice explaining what data is collected, why it is needed, and how a user can request deletion.
+- [ ] Delete all real tester data before the public submission. Use invented data for screenshots, seed files, and demos.
 
-```js
-import helmet from 'helmet'
-app.use(helmet())
-```
+## Known trade-offs and next steps
 
-## Privacy
-
-The half that matters more, because it is about other people.
-
-- [ ] **No real classmates' names, numbers, emails or photos**, anywhere. Not in
-      seed data, not in screenshots, not in the demo video. Consent for a course
-      project does not cover the next ten years of a public repository
-- [ ] Seed data is invented. Yours will be read
-- [ ] If real people tested your app, even three friends, their data is deleted
-      before you submit
-- [ ] If your app collects anything about anyone, the app says what it collects
-- [ ] Any face in a screenshot is stock, generated, or yours
-
-If your project handles personal information about real people, you are inside
-the Philippine Data Privacy Act. Collect the minimum, say what you collect, and
-do not collect anything you cannot justify.
-
-## What to write in your journal
-
-One short paragraph: the riskiest thing about your project from this list, what
-you did about it, and what you knowingly accepted. A student who can name the
-tradeoff they made scores better than one who claims there was none.
+The main risk is that trade notes can reveal personal financial behaviour or sensitive strategy details if a user shares screenshots or uses a shared device. TradeJournal reduces the risk by requiring sign-in, using `HttpOnly` session cookies, and scoping every trade query to its owner. The current project does not yet include rate limiting, Helmet, or CSRF protection for cross-site cookies; those controls should be added before treating the deployment as production-ready. Users should avoid entering brokerage credentials, account numbers, or other unnecessary personal information in trade notes.

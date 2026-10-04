@@ -1,37 +1,63 @@
-# Weekly Increment Report
+# Cumulative Increment Report — TradeJournal
 
-**Week of:** September 20, 2026
+**Reporting period:** Project start to 4 October 2026
 
-## What changed this week
+This report records the progress of TradeJournal from the original idea through the current deployed, authenticated full-stack version. Supporting evidence is linked to the project documentation below.
 
-- Planned the TradeJournal app and defined its main purpose: helping me record trades, review losses, and identify trading patterns.
-- Built the main TradeJournal dashboard.
-- Added a trade form for entering the ticker or asset, entry price, exit price, position size, trade date, outcome, and setup notes.
-- Added a trade journal that displays saved trades and their details.
-- Added the ability to edit and delete trade entries.
-- Added filters for viewing all trades, wins only, or losses only.
-- Added statistics for total trades, wins, losses, win rate, and estimated profit/loss.
-- Added browser local storage for demo mode so trade records can remain saved after refreshing the page.
-- Created a PostgreSQL database schema for the `trades` table.
-- Created Express API routes for adding, viewing, editing, and deleting trades.
-- Made the layout responsive for desktop and mobile screen sizes.
+## 1. Planning: defining the problem and core flow
 
-## Why
+The project began as a personal journal for student traders. The goal was to make it easy to record completed trades, review wins and losses, and use the results to improve future decisions. The initial scope identified four connected areas: a performance dashboard, monthly calendar, trade-entry form, and trade-history journal.
 
-These changes were made to create the main functions of TradeJournal. The goal is to have one place where I can record trades and review my performance instead of keeping information in separate notes or trying to remember past trades. The statistics and notes are especially useful for reviewing losses and learning from mistakes.
+The initial plan also identified the important application state: trades, form values, the selected calendar month, outcome filter, editing state, and loading/error feedback. Analytics are calculated from saved trades rather than stored separately, keeping the data model simpler and reducing the risk of inconsistent dashboard values.
 
-## What broke or what I got stuck on
+Evidence: [proposal](01-proposal.md).
 
-I had some difficulty deciding how the trade data should be structured so it could work in both the browser demo mode and the PostgreSQL database version. I also needed to make sure the statistics update correctly whenever a trade is added, edited, or deleted.
+## 2. Interface planning: wireframes and components
 
-Another challenge was connecting the frontend, Express API, and PostgreSQL database correctly. The app needs the correct environment variables and database connection before the live version can be tested.
+Next, the interface was mapped before visual styling. The dashboard was chosen as the home screen, with a visible route to add, edit, filter, and review trades. The wireframes documented desktop and phone layouts, then broke the screen into reusable React components such as the header, metric cards, calendar, trade form, and trade cards.
 
-## What is left
+The component plan established that shared state belongs in the app-level dashboard flow, so a saved trade immediately updates the journal list, calendar, charts, and summary metrics.
 
-- Set up and run the PostgreSQL database locally.
-- Connect the client to the real Express API instead of demo/local-storage mode.
-- Test adding, editing, deleting, and filtering trades using the real database.
-- Test that statistics update correctly with database records.
-- Deploy the frontend, API, and database.
-- Check the app on both desktop and mobile.
-- Fix any remaining bugs and polish the UI before final submission.
+Evidence: [wireframes and component breakdown](04-wireframes-component-breakdown.md).
+
+## 3. Visual design and responsive dashboard
+
+The planned layout was implemented as a dark, data-first trading dashboard. The design system uses a night background, layered panels, blue analytical accents, red loss states, green win indicators, and Manrope/DM Mono typography. The completed dashboard includes a win streak, win-rate gauge, average win/loss ratio, calendar activity, WaveScore radar, monthly trade-count and balance charts, a trade-entry form, and trade history.
+
+Responsive rules were added so the analytics and journal workspaces stack at tablet and phone sizes, while inputs and trade values remain readable without horizontal scrolling. Loading, empty, error, editing, and demo-mode states were also documented.
+
+Evidence: [mockup](02-mockup.md) and [design system](03-design-system.md).
+
+## 4. Full-stack development and deployment
+
+TradeJournal progressed from a browser-focused prototype to a React and Vite client with an Express API and Neon PostgreSQL database. The project now supports account registration, sign-in, sign-out, protected routes, and user-specific trade creation, viewing, editing, and deletion. A mock/demo API remains available for development and presentation fallback.
+
+The frontend was deployed to Vercel and the API to Render. Health and readiness endpoints were added to distinguish whether the web process or database is unavailable. Setup, environment variables, API routes, architecture, and deployment details were recorded in the main repository README.
+
+Evidence: [main project README](../README.md).
+
+## 5. Security and privacy review
+
+The current review confirmed server-side input validation, parameterized SQL queries, bcrypt password hashing, signed JWTs in `HttpOnly` cookies, CORS origin allowlisting, user ownership checks in trade queries, JSON request-size limits, and generic public error responses. Environment templates use placeholders and real `.env` files are ignored by Git.
+
+The review also records remaining production hardening: add Helmet, rate limiting, and CSRF protection for cross-site cookies; run dependency audits; add an in-app privacy notice; and remove all real user/tester data from screenshots, demos, and the public submission.
+
+Evidence: [security and privacy review](06-security-and-privacy.md).
+
+## 6. Demo and submission preparation
+
+The demonstration plan is for a three-to-five-minute recording of the deployed app. It will show the purpose of TradeJournal, complete a prepared end-to-end trade-journal flow, explain one technical decision, and name one honest improvement. Before recording, the deployed app should be warmed up, realistic invented data prepared, and any personal information or unrelated browser content removed.
+
+Evidence: [demo video plan](05-demo-video.md).
+
+## Current status
+
+TradeJournal is now a responsive, full-stack personal trading journal with authentication, user-owned records, dashboard analytics, CRUD trade management, and a documented deployment process. The documentation set covers the proposal, interface plan, visual design, demo plan, security/privacy review, and documentation index.
+
+## Remaining work
+
+- Perform a final end-to-end test using multiple accounts: registration, sign-in, CRUD actions, filters, dashboard calculations, and sign-out.
+- Test the deployed site on desktop and mobile sizes and correct any remaining visual issues.
+- Complete the documented security follow-ups: Helmet, rate limiting, CSRF protection, and dependency audits.
+- Add an in-app privacy notice and ensure all demo and screenshot data is fictional.
+- Record the deployed-site demo video and add its link to [05-demo-video.md](05-demo-video.md) and the main README.
