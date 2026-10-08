@@ -199,4 +199,4 @@ The React client handles UI state, forms, protected routes, and dashboard calcul
 
 ## License
 
-MIT. Built by Charles Jansen V. Manusig (@varon1c), HAU 6APSI Final Project.
+MIT. Built by varon1c (@varon1c), HAU 6APSI Final Project.
